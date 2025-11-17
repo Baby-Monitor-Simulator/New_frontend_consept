@@ -8,30 +8,29 @@
 import { ref, onMounted, computed } from 'vue'
 import { Chart as ChartJS, Title, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, type ChartData } from 'chart.js'
 import { Line } from 'vue-chartjs'
-import { useImportStore } from '@/stores/import';
-import GraphType from "@/enums/graphTypes"
+import GraphType from "../enums/graphTypes"
+import eventBusGraphData from "../scripts/eventBusGraphData.js";
 import { useGlobalStore } from '@/stores/global';
-import { useTranslations } from '@/composables/useTranslations';
 
 ChartJS.register(Title, Tooltip, Legend, PointElement, LineElement, CategoryScale, LinearScale)
 
 const lineChartRef = ref(null);
 
-const importStore: any = useImportStore()
 const globalStore: any = useGlobalStore()
-const { graph: graphTranslations } = useTranslations();
 
 let coordinates = [];
 const myChart = ref(null);
 const basex = ref(0);
 
 let ChartData = []
+let totalDatapoints:number;
 let updated: boolean = false;
 let first: boolean = true;
 
 
 
 const updateArray = (data:[]) => {
+        totalDatapoints += data.length;
         if(ChartData[0]){
             ChartData.concat(data)
             let newData = []
@@ -50,9 +49,6 @@ const props = defineProps({
     yStepSize: Number,
     chartTitle: String,
 })
-
-// Get the time axis label from translations
-const timeAxisLabel = computed(() => graphTranslations.value.xAxis);
 
 const options: any = {
     animation: false,
@@ -103,7 +99,7 @@ const options: any = {
             },
             title: {
                 display: true,
-                text: timeAxisLabel.value,
+                text: 'test',
                 color: '#911',
                 font: {
                     family: 'Cascadia Mono',
@@ -122,13 +118,8 @@ const data: any = ref<ChartData<'line'>>({
     datasets: []
 })
 
-const maxXValue = ref(11);
-const waitForChange = ref(0);
-
-const incrementXMaxValue = () => {
-    maxXValue.value += 0.1;
-}
-
+let maxXValue:number;
+let waitForChange = ref(0);
 
 onMounted(() => {
     // Interval to increment x-axis max value
@@ -136,15 +127,10 @@ onMounted(() => {
 
     const xIntervalId = setInterval(() => {
         const chart = myChart.value.chart;
-
-        if (waitForChange.value > 11 && updated)
-        {
-            if (chart.options.scales.x.max < upResults[upResults.length-1].timeSpan){
-                incrementXMaxValue();
-                chart.options.scales.x.min = maxXValue.value-11;
-                chart.options.scales.x.max = maxXValue.value; // Update the x-axis max value
-            }
-
+        if (chart.options.scales.x.max < totalDatapoints){
+            maxXValue = totalDatapoints
+            chart.options.scales.x.min = maxXValue-11;
+            chart.options.scales.x.max = maxXValue; // Update the x-axis max value
         }
         chart.update();
 
@@ -164,7 +150,7 @@ onMounted(() => {
                                 'rgba(255,99,132,1)',
                             ],
                             pointRadius: 0,
-                            data: fhrResults
+                            data: ChartData
                         }
                     ]
                 }
@@ -187,7 +173,7 @@ onMounted(() => {
                                 'rgba(255,99,132,1)',
                             ],
                             pointRadius: 0,
-                            data: upResults,
+                            data: ChartData,
                         }
                     ]
                 }
@@ -209,7 +195,7 @@ onMounted(() => {
                                 'rgba(255,99,132,1)',
                             ],
                             pointRadius: 0,
-                            data: mapResults
+                            data: ChartData
                         }
                     ]
                 }
@@ -225,7 +211,7 @@ onMounted(() => {
                 data.value = {
                     datasets: [
                         {
-                            label: graphTranslations.value.title,
+                            label: 'lable',
                             backgroundColor: [
                                 'rgba(255,99,132,1)',
                             ],
@@ -233,7 +219,7 @@ onMounted(() => {
                                 'rgba(255,99,132,1)',
                             ],
                             pointRadius: 0,
-                            data: o2PResults,
+                            data: ChartData,
                         }
                     ]
                 }
