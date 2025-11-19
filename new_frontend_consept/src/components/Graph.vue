@@ -1,237 +1,106 @@
 <template>
   <div class="container">
-    <Line ref="myChart" :data="data" :options="options" />
+    <div class="graph" id = "hartrateGraph"></div>
   </div>
+
 </template>
 
-<script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue'
-import { Chart as ChartJS, Title, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, type ChartData } from 'chart.js'
-import { Line } from 'vue-chartjs'
-import GraphType from "../enums/graphTypes"
-import eventBusGraphData from "../scripts/eventBusGraphData.js";
-import { useGlobalStore } from '@/stores/global';
+<script setup lang="ts">
+import {ref} from "vue"
+import {GraphData} from "../scripts/graphUtils"
+import * as Plotly from "plotly.js";
 
-ChartJS.register(Title, Tooltip, Legend, PointElement, LineElement, CategoryScale, LinearScale)
+let ChartData = ref([]);
+let totalDatapoints = ref(1);
+let update:boolean = false;
+let graphTimeStepWidth = ref(1);
 
-const lineChartRef = ref(null);
-
-const globalStore: any = useGlobalStore()
-
-let coordinates = [];
-const myChart = ref(null);
-const basex = ref(0);
-
-let ChartData = []
-let totalDatapoints:number;
-let updated: boolean = false;
-let first: boolean = true;
-
-
-
-const updateArray = (data:[]) => {
-        totalDatapoints += data.length;
-        if(ChartData[0]){
-            ChartData.concat(data)
-            let newData = []
-            for(let i=data.length-1; i<ChartData.length; i++){
-                newData = newData.concat(ChartData[i])
-            }
-        }
-        ChartData = ChartData.concat(data)
-        updated = true;
-}
-
-const props = defineProps({
-    type: Number,
-    yMin: Number,
-    yMax: Number,
-    yStepSize: Number,
-    chartTitle: String,
-})
-
-const options: any = {
-    animation: false,
-    spanGaps: true,
-    normalized: false,
-    responsive: true,
-    plugins: {
-        title: {
-            display: true,
-            text: props.chartTitle
-        },
-        legend: {
-            display: false
-        }
-    },
-    datasets: {
-        line: {
-            pointRadius: 0
-        }
-    },
-    scales: {
-        y: {
-            type: 'linear',
-            min: props.yMin,
-            max: props.yMax,
-            ticks: {
-                stepSize: props.yStepSize
-            },
-            title: {
-                display: true,
-                text: props.chartTitle,
-                color: '#911',
-                font: {
-                    family: 'Cascadia Mono',
-                    size: 16,
-                    weight: 'bold',
-                    lineHeight: 1.2,
-                },
-                padding: { top: 0, left: 0, right: 20, bottom: 0 }
-            }
-        },
-        x: {
-            type: 'linear',
-            min: 0,
-            max: 11,
-            ticks: {
-                stepSize: 1
-            },
-            title: {
-                display: true,
-                text: 'test',
-                color: '#911',
-                font: {
-                    family: 'Cascadia Mono',
-                    size: 16,
-                    weight: 'bold',
-                    lineHeight: 1.2,
-                },
-                padding: { top: 20, left: 0, right: 0, bottom: 0 }
-            }
-        }
-    },
-    maintainAspectRatio: false,
-}
-
-const data: any = ref<ChartData<'line'>>({
-    datasets: []
-})
-
-let maxXValue:number;
-let waitForChange = ref(0);
-
-onMounted(() => {
-    // Interval to increment x-axis max value
-    eventBusGraphData.on('arrayUpdated', updateArray);
-
-    const xIntervalId = setInterval(() => {
-        const chart = myChart.value.chart;
-        if (chart.options.scales.x.max < totalDatapoints){
-            maxXValue = totalDatapoints
-            chart.options.scales.x.min = maxXValue-11;
-            chart.options.scales.x.max = maxXValue; // Update the x-axis max value
-        }
-        chart.update();
-
-       waitForChange.value += 0.1;
-    },100);
-
-    switch (props.type) {
-        case GraphType.FetalHeartRate:
-            const heartRateId = setInterval(() => {
-                data.value = {
-                    datasets: [
-                        {
-                            backgroundColor: [
-                                'rgba(255,99,132,1)',
-                            ],
-                            borderColor: [
-                                'rgba(255,99,132,1)',
-                            ],
-                            pointRadius: 0,
-                            data: ChartData
-                        }
-                    ]
-                }
-
-                if (globalStore.haltFetch) {
-                    clearInterval(heartRateId);
-                    clearInterval(xIntervalId);
-                }
-            }, 250)
-            break;
-        case GraphType.FetalBloodPressure:
-            const fetalBloodPressureId = setInterval(() => {
-                data.value = {
-                    datasets: [
-                        {
-                            backgroundColor: [
-                                'rgba(255,99,132,1)',
-                            ],
-                            borderColor: [
-                                'rgba(255,99,132,1)',
-                            ],
-                            pointRadius: 0,
-                            data: ChartData,
-                        }
-                    ]
-                }
-                if (globalStore.haltFetch) {
-                    clearInterval(fetalBloodPressureId);
-                    clearInterval(xIntervalId);
-                }
-            }, 250)
-            break;
-        case GraphType.UterineContractions:
-            const utertineContractionsId = setInterval(() => {
-                data.value = {
-                    datasets: [
-                        {
-                            backgroundColor: [
-                                'rgba(255,99,132,1)',
-                            ],
-                            borderColor: [
-                                'rgba(255,99,132,1)',
-                            ],
-                            pointRadius: 0,
-                            data: ChartData
-                        }
-                    ]
-                }
-
-                if (globalStore.haltFetch) {
-                    clearInterval(utertineContractionsId);
-                    clearInterval(xIntervalId);
-                }
-            }, 250)
-            break;
-        case GraphType.FetalBlood:
-            const fetalBloodId = setInterval(() => {
-                data.value = {
-                    datasets: [
-                        {
-                            label: 'lable',
-                            backgroundColor: [
-                                'rgba(255,99,132,1)',
-                            ],
-                            borderColor: [
-                                'rgba(255,99,132,1)',
-                            ],
-                            pointRadius: 0,
-                            data: ChartData,
-                        }
-                    ]
-                }
-
-                if (globalStore.haltFetch) {
-                    clearInterval(fetalBloodId);
-                    clearInterval(xIntervalId);
-                }
-            }, 250)
-            break;
+function GraphUpdate(graphData:GraphData, updateGraph?:boolean){
+    update = UpdateChartData(graphData)
+    if(update && updateGraph){
+        UpdateGraph()
     }
-})
+}
+
+function UpdateChartData (data:GraphData) : boolean {
+    try{
+        //updating total datapoints to newest data
+        if (data.total_timesteps > totalDatapoints.value){
+            totalDatapoints.value = data.total_timesteps;
+        }
+        
+        //add incoming data to sorted list
+        if(ChartData.value.length > 0){
+            ChartData.value = ChartData.value.concat(data)
+            let releventChartData = [];
+
+            //removing data old data from graph
+            for(let i = 0; i < ChartData.value.length; i++){
+                //check if included data is withing graph width
+                if (ChartData.value[i].total_timesteps > (totalDatapoints.value-graphTimeStepWidth.value)){
+                    releventChartData = releventChartData.concat(ChartData[i]);
+                }
+            }
+            ChartData.value = releventChartData;
+            ChartData.value.sort((a:GraphData,b:GraphData)=> b.total_timesteps - a.total_timesteps)
+            update = true
+            return true
+        }
+        else if (data) {
+            ChartData.value = [data]
+            update = true
+            return true
+        }
+        else{
+            update = false
+            return false
+        }
+    }
+    catch{
+        console.log("couldn't update graph Data")
+        update = false
+        return false
+    }
+}
+
+function UpdateGraph() {
+    if(update){
+        //extracting datapoints within width
+        let xdata=[]
+        for (let i = 0; i < ChartData.value.length; i++){
+            let dataSection = ChartData.value[i]
+            let startpoint = 0;
+            //checking if all points in sections are needed
+            if (dataSection.timestep_start_ms < (totalDatapoints.value - graphTimeStepWidth.value)) {
+                let releventPointCount = dataSection.timestep_start_ms - (totalDatapoints.value - graphTimeStepWidth.value)
+                startpoint = dataSection.timesteps - releventPointCount - 1
+            }
+
+            //adding data and posibble new babys to xdata
+            for (let j = 0; j < dataSection.fetus_data.length; j++){
+                let slice = dataSection.fetus_data[j].slice(startpoint)
+                xdata[j] = xdata[j].concat(slice)
+            }
+        }
+
+        //setting y values
+        let ydata = []
+        for (let i = totalDatapoints.value - graphTimeStepWidth.value; i <= totalDatapoints.value; i++){
+            ydata = ydata.concat(i)
+        }
+
+        //constructing {Xarr,Yarr} pairs
+        let lines = []
+        for(let i = 0; i < xdata.length; i++){
+            lines = lines.concat({x: xdata,y: ydata})
+        }
+
+        let hGraph = document.getElementById('hartrategraph');
+	    Plotly.newPlot( hGraph,
+            lines,
+	        {margin: { t: 0 }});
+    }
+}
 </script>
 
 <style scoped>
