@@ -5,9 +5,9 @@
 
 </template>
 
-<script setup lang="ts">
+<script lang="ts">
 import {ref} from "vue"
-import {GraphData} from "../scripts/graphUtils"
+import {GraphData} from "@/scripts/graphUtils"
 import * as Plotly from "plotly.js";
 
 let ChartData = ref([]);
@@ -15,7 +15,7 @@ let totalDatapoints = ref(1);
 let update:boolean = false;
 let graphTimeStepWidth = ref(1);
 
-function GraphUpdate(graphData:GraphData, updateGraph?:boolean){
+export function GraphUpdate(graphData:GraphData, updateGraph?:boolean){
     update = UpdateChartData(graphData)
     if(update && updateGraph){
         UpdateGraph()
@@ -105,7 +105,10 @@ function UpdateGraph() {
 
 <style scoped>
 .container {
-  height: 40vh;
+  height: 40%;
   padding: 1%;
+}
+.graph {
+    height: 100%;
 }
 </style>
