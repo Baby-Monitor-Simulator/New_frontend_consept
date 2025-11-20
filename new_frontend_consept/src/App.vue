@@ -5,7 +5,7 @@ import Graph from './components/Graph.vue';
 <template>
   <h1>You did it!</h1>
   <div>
-    <graph/>
+    
   </div>
 </template>
 
