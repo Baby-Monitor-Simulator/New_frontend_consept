@@ -3,6 +3,7 @@ import { ref, computed } from 'vue';
 import { useWebSocket } from '@/composables/useWebSocket';
 
 const { status, messages, connect, disconnect, send } = useWebSocket('wss://echo.websocket.org/');
+// const { status, messages, connect, disconnect, send } = useWebSocket('ws://localhost:8081/testwebsocket');
 const message = ref('');
 
 const isConnected = computed(() => status.value === 'Connected');
