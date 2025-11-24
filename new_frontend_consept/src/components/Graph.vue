@@ -10,11 +10,12 @@ import {onMounted, ref} from "vue"
 import {GraphData} from "@/scripts/graphUtils"
 import {buildData} from "@/scripts/StubDataGenerator"
 import * as Plotly from 'plotly.js-dist'
+import { layouts } from "chart.js";
 
 let ChartData = ref([]);
 let totalDatapoints = ref(1);
 let update:boolean = false;
-let graphTimeStepWidth = ref(10000);
+let graphTimeStepWidth = ref(100);
 
 onMounted (()=>{
     setInterval(draw, 1000);
@@ -106,6 +107,7 @@ function UpdateGraph() {
         for (let i = totalDatapoints.value - graphTimeStepWidth.value; i <= totalDatapoints.value; i++){
             xdata = xdata.concat(i)
         }
+        xdata.sort((a:number,b:number)=> b - a)
 
         //constructing {Xarr,Yarr} pairs
         let lines = []
@@ -116,7 +118,7 @@ function UpdateGraph() {
         let hGraph = document.getElementById('hartrateGraph');
 	    Plotly.newPlot( hGraph,
             lines,
-	        {margin: { t: 0 }});
+	        {margin: { t: 0 }, yaxis:{range: [50,220]}})
     }
 }
 </script>
