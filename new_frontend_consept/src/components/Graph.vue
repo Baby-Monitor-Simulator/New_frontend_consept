@@ -5,19 +5,27 @@
 
 </template>
 
-<script lang="ts">
-import {ref} from "vue"
+<script setup lang="ts">
+import {onMounted, ref} from "vue"
 import {GraphData} from "@/scripts/graphUtils"
-import * as Plotly from "plotly.js";
+import {buildData} from "@/scripts/StubDataGenerator"
+import * as Plotly from 'plotly.js-dist'
 
 let ChartData = ref([]);
 let totalDatapoints = ref(1);
 let update:boolean = false;
 let graphTimeStepWidth = ref(1);
 
-export function GraphUpdate(graphData:GraphData, updateGraph?:boolean){
+onMounted (()=>{
+    setInterval(draw, 1000);
+})
+
+function draw(){
+    let graphData = buildData(totalDatapoints.value)
+
+    console.log('graph updating')
     update = UpdateChartData(graphData)
-    if(update && updateGraph){
+    if(update){
         UpdateGraph()
     }
 }
@@ -70,14 +78,19 @@ function UpdateGraph() {
         for (let i = 0; i < ChartData.value.length; i++){
             let dataSection = ChartData.value[i]
             let startpoint = 0;
+            
             //checking if all points in sections are needed
-            if (dataSection.timestep_start_ms < (totalDatapoints.value - graphTimeStepWidth.value)) {
-                let releventPointCount = dataSection.timestep_start_ms - (totalDatapoints.value - graphTimeStepWidth.value)
+            let sectionStart = dataSection.total_timesteps-dataSection.timesteps
+            if (sectionStart < (totalDatapoints.value - graphTimeStepWidth.value)) {
+                let releventPointCount = sectionStart - (totalDatapoints.value - graphTimeStepWidth.value)
                 startpoint = dataSection.timesteps - releventPointCount - 1
             }
 
             //adding data and posibble new babys to xdata
             for (let j = 0; j < dataSection.fetus_data.length; j++){
+                if(!xdata[j]){
+                    xdata[j] = []
+                }
                 let slice = dataSection.fetus_data[j].slice(startpoint)
                 xdata[j] = xdata[j].concat(slice)
             }
@@ -95,7 +108,7 @@ function UpdateGraph() {
             lines = lines.concat({x: xdata,y: ydata})
         }
 
-        let hGraph = document.getElementById('hartrategraph');
+        let hGraph = document.getElementById('hartrateGraph');
 	    Plotly.newPlot( hGraph,
             lines,
 	        {margin: { t: 0 }});
