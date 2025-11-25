@@ -10,7 +10,6 @@ import {onMounted, ref} from "vue"
 import {GraphData} from "@/scripts/graphUtils"
 import {buildData} from "@/scripts/StubDataGenerator"
 import * as Plotly from 'plotly.js-dist'
-import { layouts } from "chart.js";
 
 let ChartData = ref([]);
 let totalDatapoints = ref(1);
