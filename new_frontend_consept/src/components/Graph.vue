@@ -6,10 +6,13 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref} from "vue"
+import {onMounted, onUnmounted, ref} from "vue"
 import {GraphData} from "@/scripts/graphUtils"
 import {buildData} from "@/scripts/StubDataGenerator"
 import * as Plotly from 'plotly.js-dist'
+import { useWebSocket } from '@/scripts/useWebSocket';
+
+let ws = new useWebSocket('ws://localhost:8080/testwebsocket/ws');
 
 let ChartData = ref([]);
 let totalDatapoints = ref(1);
@@ -17,17 +20,27 @@ let update:boolean = false;
 let graphTimeStepWidth = ref(100);
 
 onMounted (()=>{
+    ws.connect();
+    ws.send('{"type":"ping.ping"}');
     setInterval(draw, 1000);
-})
+});
+
+onUnmounted(() => {
+    ws.disconnect();
+  });
 
 function draw(){
-    let graphData = buildData(totalDatapoints.value)
+    let graphDatas = ws.getMessages();
+    for (let i = 0; i < graphDatas.length; i++){
+        let graphData:GraphData = graphDatas[i];
+
+        update = UpdateChartData(graphData)
+        if(update){
+            UpdateGraph()
+        }
+    }
 
     console.log('graph updating')
-    update = UpdateChartData(graphData)
-    if(update){
-        UpdateGraph()
-    }
 }
 
 function UpdateChartData (data:GraphData) : boolean {
@@ -39,7 +52,7 @@ function UpdateChartData (data:GraphData) : boolean {
         
         //add incoming data to sorted list
         if(ChartData.value.length > 0){
-            console.log(ChartData.value)
+            // console.log(ChartData.value)
 
             ChartData.value = ChartData.value.concat(data)
             let releventChartData = [];
@@ -79,7 +92,7 @@ function UpdateGraph() {
         //extracting datapoints within width
         let ydata=[]
         for (let i = 0; i < ChartData.value.length; i++){
-            console.log(ChartData.value[i])
+            // console.log(ChartData.value[i])
 
             let dataSection = ChartData.value[i]
             let startpoint = 0;

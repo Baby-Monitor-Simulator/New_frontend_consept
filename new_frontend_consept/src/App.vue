@@ -5,7 +5,8 @@
   <div id="app">
     <nav>
       <router-link to="/">Home</router-link> |
-      <router-link to="/websocket">WebSocket Test</router-link>
+      <router-link to="/websocket">WebSocket Test</router-link> |
+      <router-link to="/graph">Graph</router-link>
     </nav>
     <router-view />
   </div>

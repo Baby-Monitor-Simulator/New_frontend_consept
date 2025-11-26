@@ -1,16 +1,16 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { useWebSocket } from '@/composables/useWebSocket';
+import { useWebSocket } from '@/scripts/useWebSocket';
 
 // const { status, messages, connect, disconnect, send } = useWebSocket('wss://echo.websocket.org/');
-const { status, messages, connect, disconnect, send } = useWebSocket('ws://localhost:8080/testwebsocket/ws');
+let ws = new useWebSocket('ws://localhost:8080/testwebsocket/ws');
 const message = ref('');
 
-const isConnected = computed(() => status.value === 'Connected');
+const isConnected = computed(() => ws.status.value === 'Connected');
 
 const sendMessage = () => {
   if (message.value) {
-    send(message.value);
+    ws.send(message.value);
     message.value = '';
   }
 };
@@ -19,11 +19,11 @@ const sendMessage = () => {
 <template>
   <div class="container">
     <h1>WebSocket Test</h1>
-    <p class="status">Status: <strong>{{ status }}</strong></p>
+    <p class="status">Status: <strong>{{ ws.status }}</strong></p>
     
     <div class="controls">
-      <button @click="connect" :disabled="isConnected">Connect</button>
-      <button @click="disconnect" :disabled="!isConnected">Disconnect</button>
+      <button @click="ws.connect" :disabled="isConnected">Connect</button>
+      <button @click="ws.disconnect" :disabled="!isConnected">Disconnect</button>
     </div>
     
     <div class="message-input">
@@ -38,8 +38,8 @@ const sendMessage = () => {
     
     <div class="messages">
       <h3>Messages:</h3>
-      <ul v-if="messages.length > 0">
-        <li v-for="(msg, index) in messages" :key="index">{{ msg }}</li>
+      <ul v-if="ws.messages.length > 0">
+        <li v-for="(msg, index) in ws.messages" :key="index">{{ msg }}</li>
       </ul>
       <p v-else class="no-messages">No messages yet. Connect and send a message!</p>
     </div>
