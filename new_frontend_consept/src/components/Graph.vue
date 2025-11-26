@@ -14,7 +14,7 @@ import * as Plotly from 'plotly.js-dist'
 let ChartData = ref([]);
 let totalDatapoints = ref(1);
 let update:boolean = false;
-let graphTimeStepWidth = ref(100);
+let graphTimeStepWidth = ref(4800);
 
 onMounted (()=>{
     setInterval(draw, 1000);
@@ -87,7 +87,7 @@ function UpdateGraph() {
             //checking if all points in sections are needed
             let sectionStart = dataSection.total_timesteps-dataSection.timesteps
             if (sectionStart < (totalDatapoints.value - graphTimeStepWidth.value)) {
-                let releventPointCount = sectionStart - (totalDatapoints.value - graphTimeStepWidth.value)
+                let releventPointCount =(totalDatapoints.value - graphTimeStepWidth.value) - sectionStart
                 startpoint = dataSection.timesteps - releventPointCount - 1
             }
 
@@ -117,17 +117,20 @@ function UpdateGraph() {
         let hGraph = document.getElementById('hartrateGraph');
 	    Plotly.newPlot( hGraph,
             lines,
-	        {margin: { t: 0 }, yaxis:{range: [50,220]}})
+        {
+            margin: { t: 0 }, 
+            yaxis:{range: [50,210]},
+            xaxis:{range: [totalDatapoints.value - graphTimeStepWidth.value, totalDatapoints.value]},
+            columns:1,
+            xgap:0.00833,
+            autosize:true
+        })
     }
 }
 </script>
 
 <style scoped>
-.container {
-  height: 40%;
-  padding: 1%;
-}
-.graph {
-    height: 100%;
+.graph{
+    height: 100vh;
 }
 </style>

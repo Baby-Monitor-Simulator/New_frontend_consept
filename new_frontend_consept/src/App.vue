@@ -7,7 +7,6 @@ import {ref} from "vue"
 
 <template>
   <v-app>
-    <h1>You did it!</h1>
     <div>
       <Graph id="graph" />
     </div>
