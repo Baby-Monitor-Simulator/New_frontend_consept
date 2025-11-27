@@ -23,3 +23,36 @@ export class MaternalData {
         this.maternal_oxygen_saturation = maternal_oxygen_saturation
     }
 }
+
+export const graphprops = ((Ydtick:number, minorYdtick:number,Ymax:number,Ymin:number, Xmin:number, Xmax:number)=>{
+    return {
+            margin: { t: 0 }, 
+            yaxis:{
+                dtick: Ydtick.toString(),
+                showline: true,
+                range: [Ymin,Ymax],
+                gridcolor: 'black',
+                minor: {
+                    ticks: 'inside',
+                    dtick: minorYdtick.toString(),
+                    tickcolor: 'light grey',
+                    gridcolor: 'light grey'
+                }
+            },
+            xaxis:{
+                dtick: '360',
+                showline: true,
+                range: [Xmin, Xmax],
+                gridcolor:'black',
+                minor: {
+                    ticks: 'inside',
+                    dtick: '40',
+                    tickcolor: 'light grey',
+                    gridcolor: 'light grey'
+                }
+            },
+            columns:1,
+            xgap:0.00833,
+            autosize:true,
+        }
+})

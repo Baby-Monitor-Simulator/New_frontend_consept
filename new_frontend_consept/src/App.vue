@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import { onMounted, } from 'vue';
 import Graph from '@/components/Graph.vue';
-import { GraphData, MaternalData } from '@/scripts/graphUtils';
-import {ref} from "vue"
 </script>
 
 <template>
