@@ -24,16 +24,12 @@ onMounted (()=>{
 })
 
 function draw(){
-    endtime = performance.now()
-    console.log(endtime-starttime)
-
     let graphData = buildData(totalDatapoints.value)
 
     update = UpdateChartData(graphData)
     if(update){
         UpdateGraph()
     }
-    starttime = endtime;
 }
 
 function UpdateChartData (data:GraphData) : boolean {
@@ -120,9 +116,6 @@ function UpdateGraph() {
             fetusLines.push({x: xdata,y: fetusydata[i]})
         }
         let maternalLines = [{x: xdata,y:maternalydata}]
-
-        console.log(maternalLines)
-        console.log(fetusLines)
 
         let hGraph = document.getElementById('hartrateGraph');
 	    Plotly.newPlot( hGraph,
