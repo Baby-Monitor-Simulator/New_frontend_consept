@@ -30,16 +30,13 @@ onUnmounted(() => {
   });
 
 function draw(){
-    let graphDatas = ws.getMessages();
-    for (let i = 0; i < graphDatas.length; i++){
-        let graphData:GraphData = graphDatas[i];
+    let graphDatas = ws.GetDataPoints(4);
 
-        update = UpdateChartData(graphData)
-        if(update){
-            UpdateGraph()
-        }
+    update = UpdateChartData(graphDatas)
+    if(update){
+        UpdateGraph()
     }
-
+    
     console.log('graph updating')
 }
 

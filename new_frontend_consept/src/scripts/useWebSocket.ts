@@ -1,12 +1,13 @@
 import { ref, onUnmounted } from 'vue';
 import { GraphData, MaternalData } from './graphUtils';
 import { s } from 'vite/dist/node/chunks/moduleRunnerTransport';
+import { FullReloadPayload } from 'vite';
 
 export class useWebSocket {
   url: string = '';
   ws = ref(null);
   status = ref('Disconnected');
-  messages = ref([]);
+  messages = ref<GraphData[]>([]);
 
   constructor(url:string) {
     this.url = url;
@@ -38,7 +39,7 @@ export class useWebSocket {
       
       let data_json = JSON.parse(data);
       
-      console.warn('Received data:', data_json);
+      // console.warn('Received data:', data_json);
 
       switch (data_json.type) {
         case 'simulation.update':
@@ -81,6 +82,80 @@ export class useWebSocket {
     this.messages.value = [];
     return answer_messages;
   };
+
+  GetDataPoints(ammount: number): any {
+    let all_Messages = this.getMessages();
+
+    let total_timesteps = 0;
+    let timesteps = 0;
+    let fetus_count = 0;
+    let toco = [];
+    let maternal_oxygen_saturation = [];
+    let fetus_data = [[]];
+
+    for (let index = 0; index < all_Messages.length; index++) {
+      const element = all_Messages[index];
+      if(element.total_timesteps > total_timesteps) {
+        total_timesteps = element.total_timesteps;
+      }
+
+      timesteps += element.timesteps;
+
+      if (element.fetus_count != fetus_count) {
+        fetus_count = element.fetus_count;
+      }
+
+      toco = toco.concat(element.maternal_data.toco);
+      maternal_oxygen_saturation = maternal_oxygen_saturation.concat(element.maternal_data.maternal_oxygen_saturation)
+
+      for (let index = 0; index < fetus_data.length; index++) {
+        fetus_data[index] = fetus_data[index].concat(element.fetus_data[index]);
+      }
+    }
+
+    let total_timestep_send = (total_timesteps - timesteps) + ammount;
+
+    let timesteps_send = ammount;
+    let timesteps_keep = (timesteps - ammount)
+
+    let toco_send = toco.slice(0, ammount);
+    let toco_keep = toco.slice(ammount);
+
+    let maternal_oxygen_saturation_send = maternal_oxygen_saturation.slice(0, ammount);
+    let maternal_oxygen_saturation_keep = maternal_oxygen_saturation.slice(ammount);
+
+    let fetus_data_send = [[]];
+    let fetus_data_keep = [[]];
+    for (let index = 0; index < fetus_data.length; index++) {
+      const element = fetus_data[index];
+      fetus_data_send[index] = element.slice(0, ammount);
+      fetus_data_keep[index] = element.slice(ammount);
+    }
+
+    let maternal_data_send = new MaternalData(toco_send, maternal_oxygen_saturation_send);
+    let maternal_data_keep = new MaternalData(toco_keep, maternal_oxygen_saturation_keep);
+
+    let data_send = new GraphData(
+      total_timestep_send,
+      timesteps_send,
+      fetus_count,
+      maternal_data_send,
+      fetus_data_send,
+    );
+
+    let data_keep = new GraphData(
+      total_timesteps,
+      timesteps_keep,
+      fetus_count,
+      maternal_data_keep,
+      fetus_data_keep,
+    );
+
+    this.messages.value.unshift(data_keep);
+
+    console.warn(data_send)
+    return data_send;
+  }
 
   disconnect(): void {
     if (this.ws.value) {
