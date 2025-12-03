@@ -1,6 +1,3 @@
-<script setup>
-</script>
-
 <template>
   <div id="app">
     <nav>
@@ -12,7 +9,7 @@
   </div>
 </template>
 
-<style>
+<style scoped>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;

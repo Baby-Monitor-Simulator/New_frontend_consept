@@ -37,8 +37,6 @@ function draw(){
     if(update){
         UpdateGraph()
     }
-    
-    // console.log('graph updating')
 }
 
 function UpdateChartData (data:GraphData) : boolean {
@@ -91,7 +89,6 @@ function UpdateGraph() {
         let fetusydata=[]
         let maternalydata=[]
         for (let i = 0; i < ChartData.value.length; i++){
-            // console.log(ChartData.value[i])
 
             let dataSection = ChartData.value[i];
             let startpoint = 0;

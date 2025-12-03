@@ -35,11 +35,7 @@ export class useWebSocket {
 
   restructureMessage(data): void {
     try {
-      
-      
       let data_json = JSON.parse(data);
-      
-      // console.warn('Received data:', data_json);
 
       switch (data_json.type) {
         case 'simulation.update':
@@ -72,7 +68,6 @@ export class useWebSocket {
       console.error('Failed to parse message', e);
     }
 
-    // this.messages.value.push(data);
   }
 
   getMessages(): any[] {
@@ -155,7 +150,6 @@ export class useWebSocket {
 
     this.messages.value.unshift(data_keep);
 
-    console.warn(data_send)
     return data_send;
   }
 
@@ -170,16 +164,4 @@ export class useWebSocket {
       this.ws.value.send(message);
     }
   };
-
-  // onUnmounted(() => {
-  //   disconnect();
-  // });
-
-  // return {
-  //   this.status,
-  //   messages,
-  //   connect,
-  //   disconnect,
-  //   send
-  // };
 }
