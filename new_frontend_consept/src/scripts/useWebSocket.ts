@@ -86,6 +86,8 @@ export class useWebSocket {
   GetDataPoints(ammount: number): any {
     let all_Messages = this.getMessages();
 
+    all_Messages.sort((a:GraphData,b:GraphData)=> b.total_timesteps - a.total_timesteps);
+
     let total_timesteps = 0;
     let timesteps = 0;
     let fetus_count = 0;

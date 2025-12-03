@@ -16,7 +16,7 @@ import { useWebSocket } from '@/scripts/useWebSocket';
 let ws = new useWebSocket('ws://localhost:8080/testwebsocket/ws');
 
 let ChartData = ref([]);
-let totalDatapoints = ref(1);
+let totalDatapoints = ref(0);
 let update:boolean = false;
 let graphTimeStepWidth = ref(4800);
 
@@ -38,7 +38,7 @@ function draw(){
         UpdateGraph()
     }
     
-    console.log('graph updating')
+    // console.log('graph updating')
 }
 
 function UpdateChartData (data:GraphData) : boolean {
