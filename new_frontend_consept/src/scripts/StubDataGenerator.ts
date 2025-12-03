@@ -2,7 +2,7 @@ import {GraphData,MaternalData} from "./graphUtils";
 
 export function buildData (total_timesteps:number):GraphData {
   //setting up needed arrays
-  let timeSteps = Math.random() * 10 + 3;
+  let timeSteps = 4;
   total_timesteps += timeSteps;
   let motherOx_data = [];
   let motherToco_data = []; 
@@ -22,8 +22,6 @@ export function buildData (total_timesteps:number):GraphData {
   //submitting data to graphData
   let maternal_data = new MaternalData(motherToco_data,motherOx_data)
   let graphData = new GraphData(total_timesteps,timeSteps,1,maternal_data,fetus_data)
-  
-  console.log('something')
 
   return graphData
 }

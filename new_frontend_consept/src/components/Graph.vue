@@ -1,13 +1,14 @@
 <template>
   <div class="container">
-    <div class="graph" id = "hartrateGraph"></div>
+    <div class="hgraph" id = "hartrateGraph"></div>
+    <div class="mgraph" id = "maternalGraph"></div>
   </div>
 
 </template>
 
 <script setup lang="ts">
 import {onMounted, onUnmounted, ref} from "vue"
-import {GraphData} from "@/scripts/graphUtils"
+import {GraphData, graphprops} from "@/scripts/graphUtils"
 import {buildData} from "@/scripts/StubDataGenerator"
 import * as Plotly from 'plotly.js-dist'
 import { useWebSocket } from '@/scripts/useWebSocket';
@@ -17,7 +18,7 @@ let ws = new useWebSocket('ws://localhost:8080/testwebsocket/ws');
 let ChartData = ref([]);
 let totalDatapoints = ref(1);
 let update:boolean = false;
-let graphTimeStepWidth = ref(100);
+let graphTimeStepWidth = ref(4800);
 
 onMounted (()=>{
     ws.connect();
@@ -30,9 +31,9 @@ onUnmounted(() => {
   });
 
 function draw(){
-    let graphDatas = ws.GetDataPoints(4);
+    let graphData = ws.GetDataPoints(4);
 
-    update = UpdateChartData(graphDatas)
+    update = UpdateChartData(graphData)
     if(update){
         UpdateGraph()
     }
@@ -49,16 +50,15 @@ function UpdateChartData (data:GraphData) : boolean {
         
         //add incoming data to sorted list
         if(ChartData.value.length > 0){
-            // console.log(ChartData.value)
 
-            ChartData.value = ChartData.value.concat(data)
+            ChartData.value.push(data)
             let releventChartData = [];
 
-            //removing data old data from graph
+            //removing old data from graph
             for(let i = 0; i < ChartData.value.length; i++){
                 //check if included data is withing graph width
                 if (ChartData.value[i].total_timesteps > (totalDatapoints.value-graphTimeStepWidth.value)){
-                    releventChartData = releventChartData.concat(ChartData.value[i]);
+                    releventChartData.push(ChartData.value[i]);
                 }
             }
             ChartData.value = releventChartData;
@@ -87,57 +87,70 @@ function UpdateChartData (data:GraphData) : boolean {
 function UpdateGraph() {
     if(update){
         //extracting datapoints within width
-        let ydata=[]
+        let firstPointInGraph = totalDatapoints.value - graphTimeStepWidth.value
+        let fetusydata=[]
+        let maternalydata=[]
         for (let i = 0; i < ChartData.value.length; i++){
             // console.log(ChartData.value[i])
 
-            let dataSection = ChartData.value[i]
+            let dataSection = ChartData.value[i];
             let startpoint = 0;
 
             //checking if all points in sections are needed
             let sectionStart = dataSection.total_timesteps-dataSection.timesteps
-            if (sectionStart < (totalDatapoints.value - graphTimeStepWidth.value)) {
-                let releventPointCount = sectionStart - (totalDatapoints.value - graphTimeStepWidth.value)
+            if (sectionStart < firstPointInGraph) {
+                let releventPointCount = dataSection.total_timesteps - firstPointInGraph
                 startpoint = dataSection.timesteps - releventPointCount - 1
             }
 
-            //adding data and posibble new babys to ydata
+            //adding data to maternalydata
+            let mslice = dataSection.maternal_data.toco.slice(startpoint)
+            maternalydata = maternalydata.concat(mslice)
+
+            //adding data and posibble new babys to fetusydata
             for (let j = 0; j < dataSection.fetus_data.length; j++){
-                if(!ydata[j]){
-                    ydata[j] = []
+                if(!fetusydata[j]){
+                    fetusydata[j] = []
                 }
                 let slice = dataSection.fetus_data[j].slice(startpoint)
-                ydata[j] = ydata[j].concat(slice)
+                fetusydata[j] = fetusydata[j].concat(slice)
             }
         }
 
         //setting y values
-        let xdata = []
-        for (let i = totalDatapoints.value - graphTimeStepWidth.value; i <= totalDatapoints.value; i++){
-            xdata = xdata.concat(i)
+        let xdata: number[] = []
+        for (let i = firstPointInGraph; i <= totalDatapoints.value; i++){
+            xdata.push(i)
         }
         xdata.sort((a:number,b:number)=> b - a)
 
         //constructing {Xarr,Yarr} pairs
-        let lines = []
-        for(let i = 0; i < ydata.length; i++){
-            lines = lines.concat({x: xdata,y: ydata[i]})
+        let fetusLines = []
+        for(let i = 0; i < fetusydata.length; i++){
+            fetusLines.push({x: xdata,y: fetusydata[i]})
         }
+        let maternalLines = [{x: xdata,y:maternalydata}]
 
         let hGraph = document.getElementById('hartrateGraph');
 	    Plotly.newPlot( hGraph,
-            lines,
-	        {margin: { t: 0 }, yaxis:{range: [50,220]}})
+            fetusLines,
+            graphprops(30,6,210,50,firstPointInGraph,totalDatapoints.value)
+        )
+
+        let mGraph = document.getElementById('maternalGraph');
+	    Plotly.newPlot( mGraph,
+            maternalLines,
+            graphprops(20,4,100,0,firstPointInGraph,totalDatapoints.value)
+        )
     }
 }
 </script>
 
 <style scoped>
-.container {
-  height: 40%;
-  padding: 1%;
+.hgraph{
+    height: 60vh;
 }
-.graph {
-    height: 100%;
+.mgraph{
+    height: 40vh;
 }
 </style>
