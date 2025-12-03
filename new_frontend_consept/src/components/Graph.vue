@@ -7,24 +7,31 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref} from "vue"
+import {onMounted, onUnmounted, ref} from "vue"
 import {GraphData, graphprops} from "@/scripts/graphUtils"
 import {buildData} from "@/scripts/StubDataGenerator"
 import * as Plotly from 'plotly.js-dist'
+import { useWebSocket } from '@/scripts/useWebSocket';
+
+let ws = new useWebSocket('ws://localhost:8080/testwebsocket/ws');
 
 let ChartData = ref([]);
-let totalDatapoints = ref(1);
+let totalDatapoints = ref(0);
 let update:boolean = false;
 let graphTimeStepWidth = ref(4800);
-let starttime = 0;
-let endtime = 0;
 
 onMounted (()=>{
+    ws.connect();
+    ws.send('{"type":"ping.ping"}');
     setInterval(draw, 1000);
-})
+});
+
+onUnmounted(() => {
+    ws.disconnect();
+  });
 
 function draw(){
-    let graphData = buildData(totalDatapoints.value)
+    let graphData = ws.GetDataPoints(4);
 
     update = UpdateChartData(graphData)
     if(update){
@@ -41,6 +48,7 @@ function UpdateChartData (data:GraphData) : boolean {
         
         //add incoming data to sorted list
         if(ChartData.value.length > 0){
+
             ChartData.value.push(data)
             let releventChartData = [];
 
@@ -57,6 +65,7 @@ function UpdateChartData (data:GraphData) : boolean {
             return true
         }
         else if (ChartData.value.length <= 0 && data) {
+
             ChartData.value = [data]
             update = true
             return true
@@ -80,7 +89,8 @@ function UpdateGraph() {
         let fetusydata=[]
         let maternalydata=[]
         for (let i = 0; i < ChartData.value.length; i++){
-            let dataSection = ChartData.value[i]
+
+            let dataSection = ChartData.value[i];
             let startpoint = 0;
 
             //checking if all points in sections are needed
@@ -103,6 +113,7 @@ function UpdateGraph() {
                 fetusydata[j] = fetusydata[j].concat(slice)
             }
         }
+
         //setting y values
         let xdata: number[] = []
         for (let i = firstPointInGraph; i <= totalDatapoints.value; i++){
