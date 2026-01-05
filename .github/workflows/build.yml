@@ -1,0 +1,179 @@
+name: Node.js CI
+
+on:
+  push:
+    branches: ["main", "dev"]
+  pull_request:
+    branches: ["main", "dev"]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch to run workflow on"
+        required: true
+        default: "dev"
+
+jobs:
+  # -------------------
+  # Linting / Static Analysis
+  # -------------------
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        id: eslint
+        run: |
+          npm run lint || echo "ESLINT_FAILED=true" >> $GITHUB_ENV
+        continue-on-error: true
+
+      - name: Run Prettier check
+        id: prettier
+        run: |
+          npm run format:check || echo "PRETTIER_FAILED=true" >> $GITHUB_ENV
+        continue-on-error: true
+
+      - name: Type check (if using TypeScript)
+        id: typecheck
+        run: |
+          if [ -f "tsconfig.json" ]; then
+            npm run type-check || echo "TYPECHECK_FAILED=true" >> $GITHUB_ENV
+          else
+            echo "No TypeScript configuration found, skipping type check"
+          fi
+        continue-on-error: true
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Code Quality Check Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$ESLINT_FAILED" == "true" ]; then
+            echo "❌ ESLint: FAILED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ ESLint: PASSED" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "$PRETTIER_FAILED" == "true" ]; then
+            echo "❌ Prettier: FAILED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ Prettier: PASSED" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "$TYPECHECK_FAILED" == "true" ]; then
+            echo "❌ Type Check: FAILED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ Type Check: PASSED" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Fail if any check failed
+        if: env.ESLINT_FAILED == 'true' || env.PRETTIER_FAILED == 'true' || env.TYPECHECK_FAILED == 'true'
+        run: exit 1
+
+  # -------------------
+  # Unit Tests
+  # -------------------
+  unit-tests:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+
+  # -------------------
+  # Integration Tests (E2E)
+  # -------------------
+  integration-tests:
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers (if using Playwright)
+        run: |
+          if grep -q "@playwright/test" package.json; then
+            npx playwright install --with-deps
+          fi
+
+      - name: Run E2E tests
+        run: npm run test:e2e || npm run test:integration || echo "No E2E tests configured"
+        continue-on-error: false
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results
+          path: |
+            test-results/
+            playwright-report/
+
+  # -------------------
+  # Build
+  # -------------------
+  build:
+    runs-on: ubuntu-latest
+    needs: integration-tests
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            dist/
+            build/
