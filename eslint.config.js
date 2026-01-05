@@ -9,7 +9,10 @@ import { defineConfig } from "eslint/config";
 export default defineConfig([
   { files: ["**/*.{js,mjs,cjs,ts,mts,cts,vue}"], plugins: { js }, extends: ["js/recommended"], languageOptions: { globals: globals.browser } },
   tseslint.configs.recommended,
-  { files: ["**/*.vue"], ...pluginVue.configs["flat/essential"], languageOptions: { parserOptions: { parser: tseslint.parser } } },
+  ...pluginVue.configs["flat/essential"].map(config => ({
+    ...config,
+    files: ["**/*.vue"],
+  })),
   { files: ["**/*.vue"], languageOptions: { parserOptions: { parser: tseslint.parser } } },
   { files: ["**/*.json"], plugins: { json }, language: "json/json", extends: ["json/recommended"] },
   { files: ["**/*.css"], plugins: { css }, language: "css/css", extends: ["css/recommended"] },
