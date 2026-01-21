@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import Home from "@/views/Home.vue";
+import Home from "@/views/HomeView.vue";
 import WebSocketTest from "@/views/WebSocketTest.vue";
 import GraphView from "@/views/GraphView.vue";
 
