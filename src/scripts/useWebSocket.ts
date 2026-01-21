@@ -1,7 +1,7 @@
-import { ref, onUnmounted } from "vue";
+import { ref } from "vue";
 import { GraphData, MaternalData } from "./graphUtils";
-import { s } from "vite/dist/node/chunks/moduleRunnerTransport";
-import { FullReloadPayload } from "vite";
+// import { s } from "vite/dist/node/chunks/moduleRunnerTransport";
+// import { FullReloadPayload } from "vite";
 
 export class useWebSocket {
   url: string = "";
@@ -35,11 +35,11 @@ export class useWebSocket {
 
   restructureMessage(data): void {
     try {
-      let data_json = JSON.parse(data);
+      const data_json = JSON.parse(data);
 
       switch (data_json.type) {
-        case "simulation.update":
-          let maternalData = new MaternalData(
+        case "simulation.update": {
+          const maternalData = new MaternalData(
             data_json.payload.maternal_data.toco,
             data_json.payload.maternal_data.maternal_oxygen_saturation,
           );
@@ -53,7 +53,8 @@ export class useWebSocket {
           );
 
           this.messages.value.push(refactored);
-          break;
+          break; 
+        }
         case "ping.pong":
           console.log("Ping pong received");
           break;

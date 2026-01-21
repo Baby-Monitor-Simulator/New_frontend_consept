@@ -19,8 +19,6 @@ let ChartData = ref([]);
 let totalDatapoints = ref(1);
 let update:boolean = false;
 let graphTimeStepWidth = ref(4800);
-let starttime = 0;
-let endtime = 0;
 
 onMounted(() => {
   ws.connect();
