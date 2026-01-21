@@ -11,6 +11,7 @@ export default defineConfig([
     files: ["**/*.{js,mjs,cjs,ts,mts,cts,vue}"],
     plugins: { js },
     extends: ["js/recommended"],
+    ignorePatterns: ["package-lock.json", "node_modules/"],
     languageOptions: { globals: globals.browser },
   },
   tseslint.configs.recommended,
