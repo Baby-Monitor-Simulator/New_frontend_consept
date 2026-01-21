@@ -12,6 +12,7 @@ import { buildData } from "@/scripts/StubDataGenerator";
 import * as Plotly from "plotly.js-dist";
 import { useWebSocket } from "@/scripts/useWebSocket";
 
+const use_stub_data: boolean = true;
 let ws = new useWebSocket("ws://localhost:8080/testwebsocket/ws");
 
 let ChartData = ref([]);
@@ -30,7 +31,15 @@ onUnmounted(() => {
 });
 
 function draw() {
-  let graphData = ws.GetDataPoints(4);
+  let graphData: GraphData;
+  if (use_stub_data) {
+    graphData = buildData(4);
+  }
+  else
+  {
+    graphData = ws.GetDataPoints(4);
+  }
+  
 
   update = UpdateChartData(graphData);
   if (update) {
