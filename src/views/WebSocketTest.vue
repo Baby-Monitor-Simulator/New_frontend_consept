@@ -1,17 +1,17 @@
 <script setup>
-import { ref, computed } from 'vue';
-import { useWebSocket } from '@/scripts/useWebSocket';
+import { ref, computed } from "vue";
+import { useWebSocket } from "@/scripts/useWebSocket";
 
 // const { status, messages, connect, disconnect, send } = useWebSocket('wss://echo.websocket.org/');
-let ws = new useWebSocket('ws://localhost:8080/testwebsocket/ws');
-const message = ref('');
+let ws = new useWebSocket("ws://localhost:8080/testwebsocket/ws");
+const message = ref("");
 
-const isConnected = computed(() => ws.status.value === 'Connected');
+const isConnected = computed(() => ws.status.value === "Connected");
 
 const sendMessage = () => {
   if (message.value) {
     ws.send(message.value);
-    message.value = '';
+    message.value = "";
   }
 };
 </script>
@@ -19,29 +19,35 @@ const sendMessage = () => {
 <template>
   <div class="container">
     <h1>WebSocket Test</h1>
-    <p class="status">Status: <strong>{{ ws.status }}</strong></p>
-    
+    <p class="status">
+      Status: <strong>{{ ws.status }}</strong>
+    </p>
+
     <div class="controls">
       <button @click="ws.connect" :disabled="isConnected">Connect</button>
-      <button @click="ws.disconnect" :disabled="!isConnected">Disconnect</button>
+      <button @click="ws.disconnect" :disabled="!isConnected">
+        Disconnect
+      </button>
     </div>
-    
+
     <div class="message-input">
-      <input 
-        v-model="message" 
-        @keyup.enter="sendMessage" 
+      <input
+        v-model="message"
+        @keyup.enter="sendMessage"
         placeholder="Type a message"
         :disabled="!isConnected"
-      >
+      />
       <button @click="sendMessage" :disabled="!isConnected">Send</button>
     </div>
-    
+
     <div class="messages">
       <h3>Messages:</h3>
       <ul v-if="ws.messages.length > 0">
         <li v-for="(msg, index) in ws.messages" :key="index">{{ msg }}</li>
       </ul>
-      <p v-else class="no-messages">No messages yet. Connect and send a message!</p>
+      <p v-else class="no-messages">
+        No messages yet. Connect and send a message!
+      </p>
     </div>
   </div>
 </template>

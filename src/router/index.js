@@ -1,30 +1,29 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import Home from '@/views/Home.vue'
-import WebSocketTest from '@/views/WebSocketTest.vue'
-import GraphView from '@/views/GraphView.vue'
-
+import { createRouter, createWebHistory } from "vue-router";
+import Home from "@/views/HomeView.vue";
+import WebSocketTest from "@/views/WebSocketTest.vue";
+import GraphView from "@/views/GraphView.vue";
 
 const routes = [
   {
-    path: '/',
-    name: 'Home',
-    component: Home
+    path: "/",
+    name: "Home",
+    component: Home,
   },
   {
-    path: '/websocket',
-    name: 'WebSocket',
-    component: WebSocketTest
+    path: "/websocket",
+    name: "WebSocket",
+    component: WebSocketTest,
   },
   {
-    path: '/graph',
-    name: 'graph',
-    component: GraphView
-  }
-]
+    path: "/graph",
+    name: "graph",
+    component: GraphView,
+  },
+];
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
-})
+  routes,
+});
 
-export default router
+export default router;
