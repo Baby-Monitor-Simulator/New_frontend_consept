@@ -69,16 +69,16 @@ export class useWebSocket {
     }
   }
 
-  getMessages(): any[] {
-    let answer_messages = this.messages.value;
+  getMessages(): GraphData[] {
+    const answer_messages = this.messages.value;
 
     //reset messages after retrieval
     this.messages.value = [];
     return answer_messages;
   }
 
-  GetDataPoints(ammount: number): any {
-    let all_Messages = this.getMessages();
+  GetDataPoints(ammount: number): GraphData {
+    const all_Messages = this.getMessages();
 
     all_Messages.sort(
       (a: GraphData, b: GraphData) => b.total_timesteps - a.total_timesteps,
@@ -89,7 +89,7 @@ export class useWebSocket {
     let fetus_count = 0;
     let toco = [];
     let maternal_oxygen_saturation = [];
-    let fetus_data = [[]];
+    const fetus_data = [[]];
 
     for (let index = 0; index < all_Messages.length; index++) {
       const element = all_Messages[index];
@@ -113,10 +113,10 @@ export class useWebSocket {
       }
     }
 
-    let total_timestep_send = total_timesteps - timesteps + ammount;
+    const total_timestep_send = total_timesteps - timesteps + ammount;
 
-    let timesteps_send = ammount;
-    let timesteps_keep = timesteps - ammount;
+    const timesteps_send = ammount;
+    const timesteps_keep = timesteps - ammount;
 
     let toco_send = toco.slice(0, ammount);
     let toco_keep = toco.slice(ammount);
