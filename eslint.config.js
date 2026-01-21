@@ -11,6 +11,9 @@ export default defineConfig([
     files: ["**/*.{js,mjs,cjs,ts,mts,cts,vue}"],
     plugins: { js },
     extends: ["js/recommended"],
+    rules: {
+      "import/no-extraneous-dependencies": ["error", {"devDependencies": false, "optionalDependencies": false, "peerDependencies": false}]
+    },
     languageOptions: { globals: globals.browser },
   },
   tseslint.configs.recommended,
