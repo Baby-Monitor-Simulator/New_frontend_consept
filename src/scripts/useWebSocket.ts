@@ -53,7 +53,7 @@ export class useWebSocket {
           );
 
           this.messages.value.push(refactored);
-          break; 
+          break;
         }
         case "ping.pong":
           console.log("Ping pong received");

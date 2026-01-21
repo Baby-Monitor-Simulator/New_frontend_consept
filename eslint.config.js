@@ -4,7 +4,7 @@ import tseslint from "typescript-eslint";
 import pluginVue from "eslint-plugin-vue";
 import json from "@eslint/json";
 import css from "@eslint/css";
-import { defineConfig, globalIgnores} from "eslint/config";
+import { defineConfig, globalIgnores } from "eslint/config";
 
 export default defineConfig([
   {
@@ -14,11 +14,11 @@ export default defineConfig([
     languageOptions: { globals: globals.browser },
   },
   globalIgnores([
-		"build/**/*", 
-		"node_modules/**/*",
+    "build/**/*",
+    "node_modules/**/*",
     "dist/**/*",
-    "package-lock.json"
-	]),
+    "package-lock.json",
+  ]),
   tseslint.configs.recommended,
   ...pluginVue.configs["flat/essential"].map((config) => ({
     ...config,
