@@ -44,7 +44,7 @@ export class useWebSocket {
             data_json.payload.maternal_data.maternal_oxygen_saturation,
           );
 
-          let refactored = new GraphData(
+          const refactored = new GraphData(
             data_json.payload.total_timesteps,
             data_json.payload.timesteps,
             data_json.payload.fetus_count,
@@ -118,34 +118,34 @@ export class useWebSocket {
     const timesteps_send = ammount;
     const timesteps_keep = timesteps - ammount;
 
-    let toco_send = toco.slice(0, ammount);
-    let toco_keep = toco.slice(ammount);
+    const toco_send = toco.slice(0, ammount);
+    const toco_keep = toco.slice(ammount);
 
-    let maternal_oxygen_saturation_send = maternal_oxygen_saturation.slice(
+    const maternal_oxygen_saturation_send = maternal_oxygen_saturation.slice(
       0,
       ammount,
     );
-    let maternal_oxygen_saturation_keep =
+    const maternal_oxygen_saturation_keep =
       maternal_oxygen_saturation.slice(ammount);
 
-    let fetus_data_send = [[]];
-    let fetus_data_keep = [[]];
+    const fetus_data_send = [[]];
+    const fetus_data_keep = [[]];
     for (let index = 0; index < fetus_data.length; index++) {
       const element = fetus_data[index];
       fetus_data_send[index] = element.slice(0, ammount);
       fetus_data_keep[index] = element.slice(ammount);
     }
 
-    let maternal_data_send = new MaternalData(
+    const maternal_data_send = new MaternalData(
       toco_send,
       maternal_oxygen_saturation_send,
     );
-    let maternal_data_keep = new MaternalData(
+    const maternal_data_keep = new MaternalData(
       toco_keep,
       maternal_oxygen_saturation_keep,
     );
 
-    let data_send = new GraphData(
+    const data_send = new GraphData(
       total_timestep_send,
       timesteps_send,
       fetus_count,
@@ -153,7 +153,7 @@ export class useWebSocket {
       fetus_data_send,
     );
 
-    let data_keep = new GraphData(
+    const data_keep = new GraphData(
       total_timesteps,
       timesteps_keep,
       fetus_count,
